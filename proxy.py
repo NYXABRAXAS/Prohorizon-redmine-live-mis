@@ -8,7 +8,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# Your Redmine Details
+# --- CONFIGURATION ---
+# Professional branding for **Prohorizon Digitech Solution**
 REDMINE_URL = "https://redmine.prohorizon.in:3000"
 API_KEY = "16eac9e2365e5e3b2f398ee4b16dd30f815d2dd7"
 BASE_API = f"{REDMINE_URL}/issues.json?status_id=*&key={API_KEY}"
@@ -21,6 +22,7 @@ def fetch_page(offset):
     except Exception:
         return None
 
+# --- API ENDPOINT ---
 @app.route('/api/issues')
 def get_issues():
     first_page = fetch_page(0)
@@ -31,6 +33,7 @@ def get_issues():
     all_issues = first_page.get("issues", [])
     offsets = range(100, total_count, 100)
 
+    # High-speed multi-threaded fetching
     with ThreadPoolExecutor(max_workers=10) as executor:
         results = list(executor.map(fetch_page, offsets))
 
@@ -40,9 +43,11 @@ def get_issues():
 
     return jsonify({"issues": all_issues})
 
+# --- SERVING THE DASHBOARD ---
 @app.route('/')
 def index():
-    return send_from_directory('.', 'index.html')
+    # This tells Flask to show your mis.html file when the link is opened
+    return send_from_directory('.', 'mis.html')
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
