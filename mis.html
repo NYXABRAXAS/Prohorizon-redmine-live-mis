@@ -119,10 +119,12 @@ async function loadData() {
     try {
         const res = await fetch(API);
         const data = await res.json();
-        allIssues = data.issues;
+        allIssues = data.issues || [];
         activeIssues = [...allIssues]; 
         refreshUI();
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+        console.error("Fetch Error:", err);
+    }
     finally { loader.classList.add('hidden'); loader.classList.remove('flex'); }
 }
 
