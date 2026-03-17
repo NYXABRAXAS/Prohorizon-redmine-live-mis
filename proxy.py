@@ -17,7 +17,8 @@ BASE_API = f"{REDMINE_URL}/issues.json?status_id=*&key={API_KEY}"
 def fetch_page(offset):
     url = f"{BASE_API}&limit=100&offset={offset}"
     try:
-        with urllib.request.urlopen(url) as response:
+        # Added a 15-second timeout to prevent the app from hanging
+        with urllib.request.urlopen(url, timeout=15) as response:
             return json.loads(response.read())
     except Exception:
         return None
@@ -27,7 +28,7 @@ def fetch_page(offset):
 def get_issues():
     first_page = fetch_page(0)
     if not first_page:
-        return jsonify({"error": "Failed to fetch data"}), 500
+        return jsonify({"error": "Failed to fetch data from Redmine"}), 500
 
     total_count = first_page.get("total_count", 0)
     all_issues = first_page.get("issues", [])
@@ -46,9 +47,10 @@ def get_issues():
 # --- SERVING THE DASHBOARD ---
 @app.route('/')
 def index():
-    # This tells Flask to show your mis.html file when the link is opened
+    # This specifically looks for your mis.html file
     return send_from_directory('.', 'mis.html')
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    # Render requires the app to listen on the port provided by the environment
+    port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
